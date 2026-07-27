@@ -1,76 +1,59 @@
-# Setup Steps
+# Books API
 
-## Installation of virtual environment
+A simple FastAPI project to manage a collection of books.
+
+## Setup
 
 ```bash
-# Check pip version
-pip3 list
-
-# Create venv - fastapienv is the name of the env
-python3 -m venv fastapienv
+# Create virtual environment
+python3 -m venv .venv
 
 # Activate
-source fastapienv/bin/activate
+source .venv/bin/activate
 
-# Activate from within dir
-source ../fastapienv/bin/activate
+# Upgrade pip
+pip install --upgrade pip
 
-
-# Deactivate
-deactivate
-
-# See installs in venv ** note don't need pip3
-pip list
+# Install all dependencies (runtime + dev) from pyproject.toml
+pip install -e ".[dev]"
 ```
 
-## Install initial deps
+> Dependencies are declared in `pyproject.toml`. There is no `requirements.txt`.
+
+## Run
 
 ```bash
-# Newest, allows running with fastapi run <path-to-py-file>
-pip install "fastapi[standard]" 
-pip install "uivcorn[standard]"
-```
-
-## Projects
-
-## General
-
-- FastAPI spins up at url 127.0.0.1:8000/<endpoint-name>
-
-### Books API
-
-Serve up with script
-```bash
-# run in prod
-fastapi run books_api/books.py
-## run in dev
-fastapi dev books_api/books.py
-
-# From the root
+# Development (with auto-reload)
 uvicorn books_api.books:app --reload
-# From within /books_api/
-uvicorn books:app --reload
+
+# Or via FastAPI CLI
+fastapi dev books_api/books.py
 ```
+
+Server starts at `http://127.0.0.1:8000`.
 
 ## Docs
 
 Available at [http://0.0.0.0:8000/docs](http://0.0.0.0:8000/docs)
 
+## Test
 
-## Linting and type checking
+```bash
+pytest -v
+```
+
+## Lint and type check
 
 ```bash
 # Lint with ruff
-.venv/bin/python -m ruff check books_api/
+ruff check books_api/ tests/
 
 # Type check with ty
-.venv/bin/python -m ty check books_api/
+ty check books_api/ tests/
 ```
 
 ## Reference
 
-### Package details
-
-- uvicorn - python web server
-- ruff - linting, formatting, sorting
-- ty - static type checking
+- `pyproject.toml` — single source of truth for dependencies, tool config, and project metadata
+- `books_api/` — application code
+- `tests/` — pytest test suite

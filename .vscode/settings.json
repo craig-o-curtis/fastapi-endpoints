@@ -1,0 +1,14 @@
+{
+  "python-envs.defaultEnvManager": "ms-python.python:system",
+  "ruff.enable": true,
+  "ruff.lint.enable": true,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "charliermarsh.ruff",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.ruff": "explicit"
+  },
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff"
+  },
+  "python.analysis.typeCheckingMode": "off"
+}

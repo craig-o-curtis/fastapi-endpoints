@@ -1,27 +1,49 @@
-[tool.ruff]
-# Target Python 3.12 for broad compatibility
-target-version = "py312"
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
 
-# Files to include/exclude
-include = ["books_api/**/*.py", "books_api/*.py"]
-exclude = [
-    "fastapienv",
-    "__pycache__",
-    ".git",
+[tool.setuptools.packages.find]
+include = ["books_api*"]
+
+[project]
+name = "books-api"
+version = "1.0.0"
+requires-python = ">=3.12"
+
+dependencies = [
+    "fastapi>=0.140.0",
+    "uvicorn>=0.30.0",
+    "bcrypt==4.0.1",
+    "cryptography",
+    "psycopg2-binary",
+    "PyMySQL",
+    "python-jose",
+    "python-multipart",
+    "SQLAlchemy",
+    "passlib",
+    "aiofiles",
+    "jinja2",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.6.0",
+    "ty>=0.0.63",
+    "pytest>=8.0.0",
+    "httpx>=0.27.0",
+    "pytest-asyncio>=1.4.0",
+]
+
+[tool.pytest.ini_options]
+filterwarnings = ["ignore::starlette.exceptions.StarletteDeprecationWarning"]
+
+[tool.ruff]
+target-version = "py312"
+include = ["books_api/**/*.py", "books_api/*.py"]
+exclude = ["fastapienv", "__pycache__", ".git"]
 line-length = 88
 
 [tool.ruff.lint]
-# Enable rule categories:
-# E   - pycodestyle errors
-# W   - pycodestyle warnings
-# F   - pyflakes
-# I   - isort (import sorting)
-# UP  - pyupgrade (modern Python idioms)
-# B   - flake8-bugbear (common bug patterns)
-# SIM - flake8-simplify
-
 select = ["E", "W", "F", "I", "UP", "B", "SIM"]
 
 [tool.ruff.lint.isort]
@@ -29,9 +51,6 @@ known-first-party = ["books_api"]
 combine-as-imports = true
 
 [tool.ruff.format]
-# Use double quotes (matches PEP 8 / black default)
 quote-style = "double"
-# Use spaces for indentation
 indent-style = "space"
-# Add trailing commas in multi-line expressions
 skip-magic-trailing-comma = false
