@@ -20,6 +20,7 @@ class Book(BaseModel):
     )
 
 
+# Annotation adds metadata, validation, documentation, and examples your parameters
 BookIdPath = Annotated[
     int,
     Path(ge=1, description="The ID of the book to retrieve."),
@@ -71,25 +72,14 @@ def root() -> dict[str, str]:
 
 @app.get(
     "/books",
-    summary="List all books in the collection",
-    description="Retrieve all books in the collection.",
-    response_description="A list of books",
 )
 def read_all_books() -> list[Book]:
     """Retrieve all books."""
     return list(BOOKS.values())
 
 
-@app.get(
-    "/books/{book_id}",
-    summary="Get a book by ID",
-    description="Retrieve a single book by its unique identifier.",
-    response_description="The requested book",
-    responses={
-        404: {"description": "Book not found with the specified ID."},
-    },
-)
-def read_book(
+@app.get("/books/{book_id}")
+def read_book_by_id(
     book_id: BookIdPath,
 ) -> Book:
     """
@@ -106,15 +96,7 @@ def read_book(
     return book
 
 
-@app.get(
-    "/books/categories/{category}",
-    summary="Get books by category",
-    description="Retrieve all books that belong to the specified category.",
-    response_description="A list of books in the category",
-    responses={
-        404: {"description": "No books found for the specified category."},
-    },
-)
+@app.get("/books/categories/{category}")
 def read_books_by_category(
     category: CategoryPath,
 ) -> list[Book]:
@@ -133,15 +115,7 @@ def read_books_by_category(
 
 
 # read_books_by_author
-@app.get(
-    "/books/authors/{author}",
-    summary="Get books by author",
-    description="Retrieve all books that belong to the specified author.",
-    response_description="A list of books in the author",
-    responses={
-        404: {"description": "No books found for the specified author."},
-    },
-)
+@app.get("/books/authors/{author}")
 def read_books_by_author(
     author: AuthorPath,
 ) -> list[Book]:
@@ -160,15 +134,7 @@ def read_books_by_author(
 
 
 # get book by title
-@app.get(
-    "/books/titles/{title}",
-    summary="Get books by title",
-    description="Retrieve all books that belong to the specified title.",
-    response_description="A list of books in the title",
-    responses={
-        404: {"description": "No books found for the specified title."},
-    },
-)
+@app.get("/books/titles/{title}")
 def read_books_by_title(
     title: TitlePath,
 ) -> list[Book]:
