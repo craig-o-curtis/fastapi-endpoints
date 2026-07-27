@@ -7,7 +7,12 @@ def cleanse_string(string: str) -> str:
     Returns:
         str: The cleansed string.
     """
-    return string.strip().lower()
+    return string.strip().casefold()
+
+
+def is_casefold_match(field_value: str, query: str) -> bool:
+    """Case-insensitive comparison with whitespace normalization."""
+    return cleanse_string(field_value) == cleanse_string(query)
 
 
 def is_positive_integer(input: int) -> bool:

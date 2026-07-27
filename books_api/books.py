@@ -3,6 +3,8 @@ from typing import Annotated
 from fastapi import FastAPI, HTTPException, Path
 from pydantic import BaseModel, Field
 
+from .api_utils import is_casefold_match, is_positive_integer
+
 app = FastAPI(
     title="Books API",
     description="A simple API to manage a collection of books.",
@@ -87,6 +89,11 @@ def read_book_by_id(
 
     The ID must be a positive integer.
     """
+    if not is_positive_integer(book_id):
+        raise HTTPException(
+            status_code=422,
+            detail=f"Book ID must be a positive integer. Received: {book_id}",
+        )
     book = BOOKS.get(book_id)
     if book is None:
         raise HTTPException(
@@ -105,7 +112,9 @@ def read_books_by_category(
 
     The category name is case-sensitive.
     """
-    filtered = [book for book in BOOKS.values() if book.category == category]
+    filtered = [
+        book for book in BOOKS.values() if is_casefold_match(book.category, category)
+    ]
     if not filtered:
         raise HTTPException(
             status_code=404,
@@ -124,7 +133,9 @@ def read_books_by_author(
 
     The author name is case-sensitive.
     """
-    filtered = [book for book in BOOKS.values() if book.author == author]
+    filtered = [
+        book for book in BOOKS.values() if is_casefold_match(book.author, author)
+    ]
     if not filtered:
         raise HTTPException(
             status_code=404,
@@ -143,7 +154,7 @@ def read_books_by_title(
 
     The title name is case-sensitive.
     """
-    filtered = [book for book in BOOKS.values() if book.title == title]
+    filtered = [book for book in BOOKS.values() if is_casefold_match(book.title, title)]
     if not filtered:
         raise HTTPException(
             status_code=404,
