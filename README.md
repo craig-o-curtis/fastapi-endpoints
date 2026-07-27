@@ -57,9 +57,20 @@ uvicorn books:app --reload
 Available at [http://0.0.0.0:8000/docs](http://0.0.0.0:8000/docs)
 
 
+## Linting and type checking
+
+```bash
+# Lint with ruff
+.venv/bin/python -m ruff check books_api/
+
+# Type check with ty
+.venv/bin/python -m ty check books_api/
+```
+
 ## Reference
 
 ### Package details
 
 - uvicorn - python web server
 - ruff - linting, formatting, sorting
+- ty - static type checking
