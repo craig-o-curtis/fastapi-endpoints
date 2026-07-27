@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import FastAPI, HTTPException, Path
+from fastapi import FastAPI, HTTPException, Path, Query
 from pydantic import BaseModel, Field
 
 from .api_utils import is_casefold_match, is_positive_integer
@@ -22,6 +22,7 @@ class Book(BaseModel):
     )
 
 
+# Path parameter aliases
 # Annotation adds metadata, validation, documentation, and examples your parameters
 BookIdPath = Annotated[
     int,
@@ -41,6 +42,22 @@ AuthorPath = Annotated[
 TitlePath = Annotated[
     str,
     Path(max_length=100, description="The title to filter books by."),
+]
+
+# Query parameter aliases
+CategoryQuery = Annotated[
+    str | None,
+    Query(max_length=50, description="The category to filter books by."),
+]
+
+AuthorQuery = Annotated[
+    str | None,
+    Query(max_length=100, description="The author to filter books by."),
+]
+
+TitleQuery = Annotated[
+    str | None,
+    Query(max_length=100, description="The title to filter books by."),
 ]
 
 
@@ -72,12 +89,35 @@ def root() -> dict[str, str]:
     }
 
 
-@app.get(
-    "/books",
-)
-def read_all_books() -> list[Book]:
-    """Retrieve all books."""
-    return list(BOOKS.values())
+@app.get("/books")
+def read_all_books(
+    category: CategoryQuery = None,
+    author: AuthorQuery = None,
+    title: TitleQuery = None,
+) -> list[Book]:
+    """
+    Retrieve all books.
+
+    Optionally allow filtering by category, author, or title via query params
+    """
+    filtered = list(BOOKS.values())
+
+    if category is not None:
+        filtered = [
+            book for book in filtered if is_casefold_match(book.category, category)
+        ]
+    if author is not None:
+        filtered = [book for book in filtered if is_casefold_match(book.author, author)]
+    if title is not None:
+        filtered = [book for book in filtered if is_casefold_match(book.title, title)]
+
+    if not filtered:
+        raise HTTPException(
+            status_code=404,
+            detail="No books found matching the given criteria.",
+        )
+
+    return filtered
 
 
 @app.get("/books/{book_id}")
