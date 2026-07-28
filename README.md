@@ -6,10 +6,10 @@ A simple FastAPI project to manage a collection of books.
 
 ```bash
 # Create virtual environment
-python3 -m venv .venv
+python3 -m venv .fastapienv
 
 # Activate
-source .venv/bin/activate
+source .fastapienv/bin/activate
 
 # Upgrade pip
 pip install --upgrade pip
@@ -39,8 +39,17 @@ Available at [http://0.0.0.0:8000/docs](http://0.0.0.0:8000/docs)
 ## Test
 
 ```bash
+# 
+# source .fastapienv/bin/activate
 pytest -v
+# or
+pytest -v tests/
 ```
+
+> If you get `ModuleNotFoundError: No module named 'books_api'`, run the dependency setup first:
+> ```bash
+> pip install -e ".[dev]"
+> ```
 
 ## Lint and type check
 

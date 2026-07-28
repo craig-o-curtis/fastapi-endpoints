@@ -22,6 +22,15 @@ class Book(BaseModel):
     )
 
 
+class BookCreate(BaseModel):
+    title: str = Field(max_length=100, description="The title of the book.")
+    author: str = Field(max_length=100, description="The author of the book.")
+    category: str = Field(
+        max_length=50,
+        description="The category or genre of the book.",
+    )
+
+
 # Path parameter aliases
 # Annotation adds metadata, validation, documentation, and examples your parameters
 BookIdPath = Annotated[
@@ -69,6 +78,8 @@ BOOKS: dict[int, Book] = {
     5: Book(id=5, title="Title Five", author="Author Five", category="math"),
     6: Book(id=6, title="Title Six", author="Author Two", category="math"),
 }
+
+## Read Endpoints
 
 
 @app.get(
@@ -201,3 +212,36 @@ def read_books_by_title(
             detail=f"No books found in title: {title}",
         )
     return filtered
+
+
+## Create Endpoint
+
+
+@app.post("/books")
+def create_book(new_book: BookCreate) -> Book:
+    """
+    Create a new book.
+
+    The book must have a unique ID.
+    """
+    # Ensure this is not a repeat - check all key vals to see not a duplicate
+    if any(
+        is_casefold_match(book.title, new_book.title)
+        and is_casefold_match(book.author, new_book.author)
+        and is_casefold_match(book.category, new_book.category)
+        for book in BOOKS.values()
+    ):
+        raise HTTPException(
+            status_code=409,
+            detail=f"Book {new_book.title} by {new_book.author} already exists.",
+        )
+    # Create a new book with a unique ID
+    new_book_id = max(BOOKS.keys()) + 1
+    book = Book(
+        id=new_book_id,
+        title=new_book.title,
+        author=new_book.author,
+        category=new_book.category,
+    )
+    BOOKS[new_book_id] = book
+    return book

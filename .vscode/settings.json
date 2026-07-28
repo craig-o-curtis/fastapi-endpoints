@@ -1,5 +1,4 @@
 {
-  "python-envs.defaultEnvManager": "ms-python.python:system",
   "ruff.enable": true,
   "ruff.lint.enable": true,
   "editor.formatOnSave": true,
