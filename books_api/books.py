@@ -1,6 +1,7 @@
 from typing import Annotated
 
-from fastapi import Body, FastAPI, HTTPException, Path, Query
+from fastapi import Body, FastAPI, HTTPException, Path, Query, status
+from fastapi.responses import Response
 from pydantic import BaseModel, Field
 
 from .api_utils import is_casefold_match, is_positive_integer
@@ -297,3 +298,22 @@ def update_book_by_id(
         if value is not None:
             setattr(book, field, value)
     return book
+
+
+## Delete Request
+@app.delete("/books/{book_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_book_by_id(
+    book_id: BookIdPath,
+) -> Response:
+    """
+    Delete a book by ID.
+
+    The book ID must exist.
+    """
+    if book_id not in BOOKS:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Book ID {book_id} not found.",
+        )
+    BOOKS.pop(book_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

@@ -1,13 +1,20 @@
 from __future__ import annotations
 
+import copy
+
 import pytest
 from fastapi.testclient import TestClient
 
-from books_api.books import app
+from books_api import books as books_module
+from books_api.books import BOOKS, app
+
+ORIGINAL_BOOKS = copy.deepcopy(BOOKS)
 
 
 @pytest.fixture
-def api_client() -> TestClient:
+def api_client(monkeypatch):
+    books = copy.deepcopy(ORIGINAL_BOOKS)
+    monkeypatch.setattr(books_module, "BOOKS", books)
     return TestClient(app)
 
 
@@ -130,4 +137,16 @@ class TestUpdateBook:
                 "category": "fiction",
             },
         )
+        assert response.status_code == 404
+
+
+class TestDeleteBook:
+    def test_happy_path(self, api_client: TestClient) -> None:
+        """Verify deleting a book returns the deleted book with all fields."""
+        response = api_client.delete("/books/1")
+        assert response.status_code == 204
+
+    def test_delete_nonexistent_book_returns_404(self, api_client: TestClient) -> None:
+        """Verify deleting a nonexistent book returns 404."""
+        response = api_client.delete("/books/999")
         assert response.status_code == 404
