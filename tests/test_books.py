@@ -100,3 +100,34 @@ class TestCreateBook:
             json={"title": "Title One", "author": "Author One", "category": "science"},
         )
         assert response.status_code == 409
+
+
+class TestUpdateBook:
+    def test_happy_path(self, api_client: TestClient) -> None:
+        """Verify updating a book returns the updated book with all fields."""
+        response = api_client.put(
+            "/books/1",
+            json={
+                "title": "Updated Title",
+                "author": "Updated Author",
+                "category": "fiction",
+            },
+        )
+        assert response.status_code == 200
+        book = response.json()
+        assert book["title"] == "Updated Title"
+        assert book["author"] == "Updated Author"
+        assert book["category"] == "fiction"
+        assert book["id"] == 1
+
+    def test_update_nonexistent_book_returns_404(self, api_client: TestClient) -> None:
+        """Verify updating a nonexistent book returns 404."""
+        response = api_client.put(
+            "/books/999",
+            json={
+                "title": "Updated Title",
+                "author": "Updated Author",
+                "category": "fiction",
+            },
+        )
+        assert response.status_code == 404

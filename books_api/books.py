@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import FastAPI, HTTPException, Path, Query
+from fastapi import Body, FastAPI, HTTPException, Path, Query
 from pydantic import BaseModel, Field
 
 from .api_utils import is_casefold_match, is_positive_integer
@@ -28,6 +28,24 @@ class BookCreate(BaseModel):
     category: str = Field(
         max_length=50,
         description="The category or genre of the book.",
+    )
+
+
+class BookUpdate(BaseModel):
+    title: str | None = Field(
+        default=None,
+        max_length=100,
+        description="Updated title of the book.",
+    )
+    author: str | None = Field(
+        default=None,
+        max_length=100,
+        description="Updated author of the book.",
+    )
+    category: str | None = Field(
+        default=None,
+        max_length=50,
+        description="Updated category or genre of the book.",
     )
 
 
@@ -218,7 +236,7 @@ def read_books_by_title(
 
 
 @app.post("/books")
-def create_book(new_book: BookCreate) -> Book:
+def create_book(new_book: Annotated[BookCreate, Body()]) -> Book:
     """
     Create a new book.
 
@@ -239,9 +257,43 @@ def create_book(new_book: BookCreate) -> Book:
     new_book_id = max(BOOKS.keys()) + 1
     book = Book(
         id=new_book_id,
-        title=new_book.title,
-        author=new_book.author,
-        category=new_book.category,
+        # title=new_book.title,
+        # author=new_book.author,
+        # category=new_book.category,
+        # Or spread with a copy, model_dump() copies the model into a dict
+        **new_book.model_dump(),
     )
     BOOKS[new_book_id] = book
+    return book
+
+
+## Update Request
+
+
+@app.put("/books/{book_id}")
+def update_book_by_id(
+    book_id: BookIdPath,
+    book_update: Annotated[BookUpdate, Body()],
+) -> Book:
+    """
+    Update a book by ID.
+
+    The book ID must exist.
+    """
+    if book_id not in BOOKS:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Book ID {book_id} not found.",
+        )
+    book = BOOKS[book_id]
+    # model_dump in pydantic serializes model instance into dict
+    # it is replacement for the old .dict()
+    # exclude_unset=True means that if a field is not set in the request body,
+    # it will not be updated
+    update_data = book_update.model_dump(exclude_unset=True)
+    # The .items() method returns a view object that displays a list
+    # of a given dictionary's key-value tuple pair.
+    for field, value in update_data.items():
+        if value is not None:
+            setattr(book, field, value)
     return book
