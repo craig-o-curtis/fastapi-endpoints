@@ -45,16 +45,14 @@ uv run ty check books_api/ tests/
 
 ## Command reference
 
-| Task           | Without `uv`                                                                                      | With `uv`                                      |
-| -------------- | ------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| Setup          | `python3 -m venv .fastapienv` \
-`source .fastapienv/bin/activate` \
-`pip install -e ".[dev]"` | `uv sync` |
-| Run dev server | `uvicorn books_api.books:app --reload`                                                            | `uv run uvicorn books_api.books:app --reload`  |
-| Run tests      | `pytest -v tests/`                                                                                | `uv run pytest -v tests/`                      |
-| Lint           | `ruff check books_api/ tests/`                                                                    | `uv run ruff check books_api/ tests/`          |
-| Format check   | `ruff format --check books_api/ tests/`                                                           | `uv run ruff format --check books_api/ tests/` |
-| Type check     | `ty check books_api/ tests/`                                                                      | `uv run ty check books_api/ tests/`            |
+| Task           | Without `uv`                                                                                    | With `uv`                                      |
+| -------------- | ----------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| Setup          | `python3 -m venv .fastapienv`<br>`source .fastapienv/bin/activate`<br>`pip install -e ".[dev]"` | `uv sync`                                      |
+| Run dev server | `uvicorn books_api.books:app --reload`                                                          | `uv run uvicorn books_api.books:app --reload`  |
+| Run tests      | `pytest -v tests/`                                                                              | `uv run pytest -v tests/`                      |
+| Lint           | `ruff check books_api/ tests/`                                                                  | `uv run ruff check books_api/ tests/`          |
+| Format check   | `ruff format --check books_api/ tests/`                                                         | `uv run ruff format --check books_api/ tests/` |
+| Type check     | `ty check books_api/ tests/`                                                                    | `uv run ty check books_api/ tests/`            |
 
 ## Reference
 
