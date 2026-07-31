@@ -178,7 +178,7 @@ def read_books_by_title(
 ## Create Endpoint
 
 
-@app.post("/books")
+@app.post("/books", status_code=status.HTTP_201_CREATED)
 def create_book(new_book: BookCreateBody) -> Book:
     """
     Create a new book.
@@ -244,6 +244,8 @@ def update_book_by_id(
     for field, value in update_data.items():
         # if value is not None: # enabling this prevents nulling out values
         setattr(book, field, value)
+        # if returning updated item, status code should be 200, easy to debug, payload
+        # if returning null, status code should be 204, hard to debug, big payload
     return book
 
 

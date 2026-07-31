@@ -151,7 +151,7 @@ class TestCreateBook:
             "/books",
             json={"title": "New Book", "author": "New Author", "category": "fiction"},
         )
-        assert response.status_code == 200
+        assert response.status_code == 201
         book = response.json()
         assert book["title"] == "New Book"
         assert book["author"] == "New Author"
@@ -170,7 +170,7 @@ class TestCreateBook:
                 "rating": 5,
             },
         )
-        assert response.status_code == 200
+        assert response.status_code == 201
         book = response.json()
         assert book["title"] == "New Book"
         assert book["author"] == "New Author"
