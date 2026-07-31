@@ -49,6 +49,10 @@ Drop caveman when:
 
 Resume caveman after clear part done.
 
+## Pre-flight
+
+Before generating the PR description, run the quality-check skill at `.agents/skills/quality-check/SKILL.md`. Do not skip. Include the gate results in the output.
+
 ## Boundaries
 
 Only generates PR description text. Does not create PR, does not push branch, does not modify git. Output ready to paste into GitHub/GitLab PR form. "stop ape-pr" or "normal mode": revert to verbose PR style.
@@ -76,4 +80,20 @@ Output NOT file, IS copiable block for human copy paste.
 [how to verify, only if non-obvious]
 
 </environment_details>
+
+## Quality Check
+
+Results from running `.agents/skills/quality-check/SKILL.md` before completing:
+
+- ✅ Lint
+- ✅ Formatting
+- ✅ Types
+- ✅ Tests
+
+If any gate fails, replace ✅ with ❌ and quote the shortest decisive error:
+
+- ❌ Lint — `books_api/books.py:42: E501 line too long (120 > 88)`
+- ❌ Formatting — `books_api/models.py not formatted`
+- ❌ Types — `books_api/books.py:15: error: unused import "Response"`
+- ❌ Tests — `test_books.py::TestReadBooks::test_filter_by_query_params FAILED (assert 3 == 2)`
 ```

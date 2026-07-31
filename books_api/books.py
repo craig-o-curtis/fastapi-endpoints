@@ -1,189 +1,29 @@
-from typing import Annotated
-
-from fastapi import Body, FastAPI, HTTPException, Path, Query, status
+from fastapi import FastAPI, HTTPException, status
 from fastapi.responses import Response
-from pydantic import BaseModel, Field
 
 from .api_utils import is_casefold_match, is_positive_integer
+from .body_aliases import BookCreateBody, BookUpdateBody
+from .mock_data import BOOKS
+from .models import Book
+from .path_aliases import (
+    AuthorPath,
+    BookIdPath,
+    CategoryPath,
+    TitlePath,
+)
+from .query_aliases import (
+    AuthorQuery,
+    CategoryQuery,
+    DescriptionQuery,
+    RatingQuery,
+    TitleQuery,
+)
 
 app = FastAPI(
     title="Books API",
     description="A simple API to manage a collection of books.",
     version="1.0.0",
 )
-
-
-class BookBase(BaseModel):
-    # No custom __init__ needed — Pydantic handles initialization, validation,
-    # and serialization automatically. Fields are populated from keyword arguments
-    # and validated against their type annotations and Field() constraints.
-    """Shared fields for all book models."""
-
-    title: str = Field(
-        min_length=2, max_length=100, description="The title of the book."
-    )
-    author: str = Field(
-        min_length=2, max_length=100, description="The author of the book."
-    )
-    category: str = Field(
-        min_length=2, max_length=50, description="The category or genre of the book."
-    )
-    description: str | None = Field(
-        default=None,
-        min_length=2,
-        max_length=100,
-        description="The description of the book.",
-    )
-    rating: int | None = Field(
-        default=None, ge=1, le=5, description="The rating of the book."
-    )
-
-
-class Book(BookBase):
-    """A book with an ID."""
-
-    id: int = Field(ge=1, description="The unique identifier of the book.")
-
-
-class BookCreate(BookBase):
-    """Created book, same as BookBase with enforced required fields"""
-
-    pass
-
-
-class BookUpdate(BookBase):
-    "PUT Book, all fields optional"
-
-    title: str | None = Field(
-        default=None,
-        min_length=2,
-        max_length=100,
-        description="Updated title of the book.",
-    )
-    author: str | None = Field(
-        default=None,
-        min_length=2,
-        max_length=100,
-        description="Updated author of the book.",
-    )
-    category: str | None = Field(
-        default=None,
-        min_length=2,
-        max_length=50,
-        description="Updated category or genre of the book.",
-    )
-    description: str | None = Field(
-        default=None,
-        min_length=2,
-        max_length=100,
-        description="Updated description of the book.",
-    )
-    rating: int | None = Field(
-        default=None,
-        ge=1,
-        le=5,
-        description="Updated rating of the book.",
-    )
-
-
-# Path parameter aliases
-# Annotation adds metadata, validation, documentation, and examples your parameters
-BookIdPath = Annotated[
-    int,
-    Path(ge=1, description="The ID of the book to retrieve."),
-]
-
-CategoryPath = Annotated[
-    str,
-    Path(max_length=50, description="The category to filter books by."),
-]
-
-AuthorPath = Annotated[
-    str,
-    Path(max_length=100, description="The author to filter books by."),
-]
-
-TitlePath = Annotated[
-    str,
-    Path(max_length=100, description="The title to filter books by."),
-]
-
-# Query parameter aliases
-CategoryQuery = Annotated[
-    str | None,
-    Query(max_length=50, description="The category to filter books by."),
-]
-
-AuthorQuery = Annotated[
-    str | None,
-    Query(max_length=100, description="The author to filter books by."),
-]
-
-TitleQuery = Annotated[
-    str | None,
-    Query(max_length=100, description="The title to filter books by."),
-]
-
-DescriptionQuery = Annotated[
-    str | None,
-    Query(max_length=100, description="The description to filter books by."),
-]
-
-RatingQuery = Annotated[
-    int | None,
-    Query(ge=1, le=5, description="The rating to filter books by."),
-]
-
-BOOKS: dict[int, Book] = {
-    1: Book(
-        id=1,
-        title="Title One",
-        author="Author One",
-        category="science",
-        description="A book about biology",
-        rating=5,
-    ),
-    2: Book(
-        id=2,
-        title="Title Two",
-        author="Author Two",
-        category="science",
-        description="A book about astronomy",
-        rating=4,
-    ),
-    3: Book(
-        id=3,
-        title="Title Three",
-        author="Author Three",
-        category="history",
-        description="A book about world history",
-        rating=3,
-    ),
-    4: Book(
-        id=4,
-        title="Title Four",
-        author="Author Four",
-        category="math",
-        description="A book about geometry",
-        rating=2,
-    ),
-    5: Book(
-        id=5,
-        title="Title Five",
-        author="Author Five",
-        category="math",
-        description="A book about calculus",
-        rating=1,
-    ),
-    6: Book(
-        id=6,
-        title="Title Six",
-        author="Author Two",
-        category="math",
-        description="A book about trigonometry",
-        rating=1,
-    ),
-}
 
 ## Read Endpoints
 
@@ -339,7 +179,7 @@ def read_books_by_title(
 
 
 @app.post("/books")
-def create_book(new_book: Annotated[BookCreate, Body()]) -> Book:
+def create_book(new_book: BookCreateBody) -> Book:
     """
     Create a new book.
 
@@ -379,7 +219,7 @@ def create_book(new_book: Annotated[BookCreate, Body()]) -> Book:
 @app.put("/books/{book_id}")
 def update_book_by_id(
     book_id: BookIdPath,
-    book_update: Annotated[BookUpdate, Body()],
+    book_update: BookUpdateBody,
 ) -> Book:
     """
     Update a book by ID.
