@@ -36,16 +36,43 @@ class TestReadBooks:
         books = response.json()
         assert len(books) == 6
 
-    def test_read_book_by_id_found(self, api_client: TestClient) -> None:
-        """Verify GET /books/{id} returns the matching book when it exists."""
-        response = api_client.get("/books/1")
+    def test_filter_By_query_Params(self, api_client: TestClient) -> None:
+        """Verify filtering by query params returns the correct books."""
+        # Test category
+        response = api_client.get("/books?category=science")
         assert response.status_code == 200
-        book = response.json()
-        assert book["title"] == "Title One"
+        books = response.json()
+        assert len(books) == 2
+        # Test author
+        response = api_client.get("/books?author=Author One")
+        assert response.status_code == 200
+        books = response.json()
+        assert len(books) == 1
+        # Test title
+        response = api_client.get("/books?title=Title One")
+        assert response.status_code == 200
+        books = response.json()
+        assert len(books) == 1
+        # Test Description
+        response = api_client.get("/books?description=A book about biology")
+        assert response.status_code == 200
+        books = response.json()
+        assert len(books) == 1
+        # Test Rating
+        response = api_client.get("/books?rating=5")
+        assert response.status_code == 200
+        books = response.json()
+        assert len(books) == 1
 
-    def test_read_book_by_id_not_found(self, api_client: TestClient) -> None:
-        """Verify GET /books/{id} returns 404 when the book does not exist."""
-        response = api_client.get("/books/999")
+    def test_combined_query_filters(self, api_client: TestClient) -> None:
+        """Verify combining multiple query filters works correctly."""
+        # Test one that exists
+        response = api_client.get("/books?category=science&rating=5")
+        assert response.status_code == 200
+        books = response.json()
+        assert len(books) == 1
+        # Test one that doesn't exist
+        response = api_client.get("/books?category=science&rating=1")
         assert response.status_code == 404
 
     def test_filter_by_category_case_insensitive(self, api_client: TestClient) -> None:
@@ -86,6 +113,26 @@ class TestReadBooks:
         assert response.status_code == 404
 
 
+class TestReadBook:
+    def test_read_book_by_id_found(self, api_client: TestClient) -> None:
+        """Verify GET /books/{id} returns the matching book when it exists."""
+        response = api_client.get("/books/1")
+        assert response.status_code == 200
+        book = response.json()
+        assert book["title"] == "Title One"
+
+    def test_read_book_by_id_not_found(self, api_client: TestClient) -> None:
+        """Verify GET /books/{id} returns 404 when the book does not exist."""
+        response = api_client.get("/books/999")
+        assert response.status_code == 404
+
+    def test_read_book_by_id_non_integer(self, api_client: TestClient) -> None:
+        """Verify non-integer book ID returns 422."""
+        response = api_client.get("/books/abc")
+        # Code 422 is for unprocessable entity.
+        assert response.status_code == 422
+
+
 class TestCreateBook:
     def test_happy_path(self, api_client: TestClient) -> None:
         """Verify creating a book returns the created book with all fields."""
@@ -100,6 +147,92 @@ class TestCreateBook:
         assert book["category"] == "fiction"
         assert book["id"] == 7
 
+    def test_create_book_with_all_fields(self, api_client: TestClient) -> None:
+        """Verify creating a book with all fields returns the created book."""
+        response = api_client.post(
+            "/books",
+            json={
+                "title": "New Book",
+                "author": "New Author",
+                "category": "fiction",
+                "description": "A new book",
+                "rating": 5,
+            },
+        )
+        assert response.status_code == 200
+        book = response.json()
+        assert book["title"] == "New Book"
+        assert book["author"] == "New Author"
+        assert book["category"] == "fiction"
+        assert book["description"] == "A new book"
+        assert book["rating"] == 5
+
+    def test_create_title_too_short(self, api_client: TestClient) -> None:
+        """Verify creating a book with a title too short returns 422."""
+        response = api_client.post(
+            "/books",
+            json={"title": "A", "author": "New Author", "category": "fiction"},
+        )
+        assert response.status_code == 422
+
+    def test_create_title_too_long(self, api_client: TestClient) -> None:
+        """Verify creating a book with a title too long returns 422."""
+        response = api_client.post(
+            "/books",
+            json={
+                "title": "A" * 101,
+                "author": "New Author",
+                "category": "fiction",
+            },
+        )
+        assert response.status_code == 422
+
+    def test_create_author_too_short(self, api_client: TestClient) -> None:
+        """Verify creating a book with an author too short returns 422."""
+        response = api_client.post(
+            "/books",
+            json={"title": "New Book", "author": "A", "category": "fiction"},
+        )
+        assert response.status_code == 422
+
+    def test_create_author_too_long(self, api_client: TestClient) -> None:
+        """Verify creating a book with an author too long returns 422."""
+        response = api_client.post(
+            "/books",
+            json={
+                "title": "New Book",
+                "author": "A" * 101,
+                "category": "fiction",
+            },
+        )
+        assert response.status_code == 422
+
+    def test_create_description_too_short(self, api_client: TestClient) -> None:
+        """Verify creating a book with a description too short returns 422."""
+        response = api_client.post(
+            "/books",
+            json={
+                "title": "New Book",
+                "author": "New Author",
+                "category": "fiction",
+                "description": "A",
+            },
+        )
+        assert response.status_code == 422
+
+    def test_create_description_too_long(self, api_client: TestClient) -> None:
+        """Verify creating a book with a description too long returns 422."""
+        response = api_client.post(
+            "/books",
+            json={
+                "title": "New Book",
+                "author": "New Author",
+                "category": "fiction",
+                "description": "A" * 1001,
+            },
+        )
+        assert response.status_code == 422
+
     def test_duplicate_book_returns_409(self, api_client: TestClient) -> None:
         """Verify creating a duplicate book returns 409."""
         response = api_client.post(
@@ -107,6 +240,30 @@ class TestCreateBook:
             json={"title": "Title One", "author": "Author One", "category": "science"},
         )
         assert response.status_code == 409
+
+    def test_fail_to_end_required_title_returns_422(
+        self, api_client: TestClient
+    ) -> None:
+        """Verify creating a book without a title returns 422."""
+        response = api_client.post(
+            "/books",
+            json={"author": "New Author", "category": "fiction"},
+        )
+        # Error Code 422 sent when the request is well-formed but the data is invalid.
+        assert response.status_code == 422
+
+    def test_rejects_invalid_rating(self, api_client: TestClient) -> None:
+        """Verify creating a book with an invalid rating returns 422."""
+        response = api_client.post(
+            "/books",
+            json={
+                "title": "New Book",
+                "author": "New Author",
+                "category": "fiction",
+                "rating": 6,
+            },
+        )
+        assert response.status_code == 422
 
 
 class TestUpdateBook:

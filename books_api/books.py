@@ -13,26 +13,47 @@ app = FastAPI(
 )
 
 
-class Book(BaseModel):
+class BookBase(BaseModel):
+    # No custom __init__ needed — Pydantic handles initialization, validation,
+    # and serialization automatically. Fields are populated from keyword arguments
+    # and validated against their type annotations and Field() constraints.
+    """Shared fields for all book models."""
+
+    title: str = Field(
+        min_length=2, max_length=100, description="The title of the book."
+    )
+    author: str = Field(
+        min_length=2, max_length=100, description="The author of the book."
+    )
+    category: str = Field(
+        min_length=2, max_length=50, description="The category or genre of the book."
+    )
+    description: str | None = Field(
+        default=None,
+        min_length=2,
+        max_length=100,
+        description="The description of the book.",
+    )
+    rating: int | None = Field(
+        default=None, ge=1, le=5, description="The rating of the book."
+    )
+
+
+class Book(BookBase):
+    """A book with an ID."""
+
     id: int = Field(ge=1, description="The unique identifier of the book.")
-    title: str = Field(max_length=100, description="The title of the book.")
-    author: str = Field(max_length=100, description="The author of the book.")
-    category: str = Field(
-        max_length=50,
-        description="The category or genre of the book.",
-    )
 
 
-class BookCreate(BaseModel):
-    title: str = Field(max_length=100, description="The title of the book.")
-    author: str = Field(max_length=100, description="The author of the book.")
-    category: str = Field(
-        max_length=50,
-        description="The category or genre of the book.",
-    )
+class BookCreate(BookBase):
+    """Created book, same as BookBase with enforced required fields"""
+
+    pass
 
 
-class BookUpdate(BaseModel):
+class BookUpdate(BookBase):
+    "PUT Book, all fields optional"
+
     title: str | None = Field(
         default=None,
         max_length=100,
@@ -47,6 +68,17 @@ class BookUpdate(BaseModel):
         default=None,
         max_length=50,
         description="Updated category or genre of the book.",
+    )
+    description: str | None = Field(
+        default=None,
+        max_length=100,
+        description="Updated description of the book.",
+    )
+    rating: int | None = Field(
+        default=None,
+        ge=1,
+        le=5,
+        description="Updated rating of the book.",
     )
 
 
@@ -88,14 +120,65 @@ TitleQuery = Annotated[
     Query(max_length=100, description="The title to filter books by."),
 ]
 
+DescriptionQuery = Annotated[
+    str | None,
+    Query(max_length=100, description="The description to filter books by."),
+]
+
+RatingQuery = Annotated[
+    int | None,
+    Query(ge=1, le=5, description="The rating to filter books by."),
+]
 
 BOOKS: dict[int, Book] = {
-    1: Book(id=1, title="Title One", author="Author One", category="science"),
-    2: Book(id=2, title="Title Two", author="Author Two", category="science"),
-    3: Book(id=3, title="Title Three", author="Author Three", category="history"),
-    4: Book(id=4, title="Title Four", author="Author Four", category="math"),
-    5: Book(id=5, title="Title Five", author="Author Five", category="math"),
-    6: Book(id=6, title="Title Six", author="Author Two", category="math"),
+    1: Book(
+        id=1,
+        title="Title One",
+        author="Author One",
+        category="science",
+        description="A book about biology",
+        rating=5,
+    ),
+    2: Book(
+        id=2,
+        title="Title Two",
+        author="Author Two",
+        category="science",
+        description="A book about astronomy",
+        rating=4,
+    ),
+    3: Book(
+        id=3,
+        title="Title Three",
+        author="Author Three",
+        category="history",
+        description="A book about world history",
+        rating=3,
+    ),
+    4: Book(
+        id=4,
+        title="Title Four",
+        author="Author Four",
+        category="math",
+        description="A book about geometry",
+        rating=2,
+    ),
+    5: Book(
+        id=5,
+        title="Title Five",
+        author="Author Five",
+        category="math",
+        description="A book about calculus",
+        rating=1,
+    ),
+    6: Book(
+        id=6,
+        title="Title Six",
+        author="Author Two",
+        category="math",
+        description="A book about trigonometry",
+        rating=1,
+    ),
 }
 
 ## Read Endpoints
@@ -124,6 +207,8 @@ def read_all_books(
     category: CategoryQuery = None,
     author: AuthorQuery = None,
     title: TitleQuery = None,
+    description: DescriptionQuery = None,
+    rating: RatingQuery = None,
 ) -> list[Book]:
     """
     Retrieve all books.
@@ -140,6 +225,14 @@ def read_all_books(
         filtered = [book for book in filtered if is_casefold_match(book.author, author)]
     if title is not None:
         filtered = [book for book in filtered if is_casefold_match(book.title, title)]
+    if description is not None:
+        filtered = [
+            book
+            for book in filtered
+            if is_casefold_match(book.description, description)
+        ]
+    if rating is not None:
+        filtered = [book for book in filtered if book.rating == rating]
 
     if not filtered:
         raise HTTPException(
@@ -233,6 +326,9 @@ def read_books_by_title(
     return filtered
 
 
+# Pydantic definitions
+
+
 ## Create Endpoint
 
 
@@ -261,6 +357,9 @@ def create_book(new_book: Annotated[BookCreate, Body()]) -> Book:
         # title=new_book.title,
         # author=new_book.author,
         # category=new_book.category,
+        # description=new_book.description,
+        # rating=new_book.rating,
+        # **new_book.dict(), was changed to .model_dump() in version ...
         # Or spread with a copy, model_dump() copies the model into a dict
         **new_book.model_dump(),
     )
@@ -286,17 +385,19 @@ def update_book_by_id(
             status_code=404,
             detail=f"Book ID {book_id} not found.",
         )
+    # The targeted book, op below mutates/updates
     book = BOOKS[book_id]
     # model_dump in pydantic serializes model instance into dict
     # it is replacement for the old .dict()
     # exclude_unset=True means that if a field is not set in the request body,
-    # it will not be updated
+    # it will not be updated - i.e. if an undefined is passed from the FE
+    # FE passing `null` will be properly converted to None
     update_data = book_update.model_dump(exclude_unset=True)
     # The .items() method returns a view object that displays a list
     # of a given dictionary's key-value tuple pair.
     for field, value in update_data.items():
-        if value is not None:
-            setattr(book, field, value)
+        # if value is not None: # enabling this prevents nulling out values
+        setattr(book, field, value)
     return book
 
 
