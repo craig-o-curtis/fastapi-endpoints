@@ -229,7 +229,9 @@ def read_all_books(
         filtered = [
             book
             for book in filtered
-            if is_casefold_match(book.description, description)
+            # need to check first if description is not None
+            if book.description is not None
+            and is_casefold_match(book.description, description)
         ]
     if rating is not None:
         filtered = [book for book in filtered if book.rating == rating]
