@@ -56,21 +56,25 @@ class BookUpdate(BookBase):
 
     title: str | None = Field(
         default=None,
+        min_length=2,
         max_length=100,
         description="Updated title of the book.",
     )
     author: str | None = Field(
         default=None,
+        min_length=2,
         max_length=100,
         description="Updated author of the book.",
     )
     category: str | None = Field(
         default=None,
+        min_length=2,
         max_length=50,
         description="Updated category or genre of the book.",
     )
     description: str | None = Field(
         default=None,
+        min_length=2,
         max_length=100,
         description="Updated description of the book.",
     )
