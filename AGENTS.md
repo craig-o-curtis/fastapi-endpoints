@@ -2,6 +2,10 @@
 
 This project uses FastAPI. Follow these conventions when working with the codebase.
 
+## AI interactions
+
+- NEVER perform CREATE, UPDATE, or DELETE git actions that add, commit, revert, stash, revert, reset or any altercations AT ALL. You may ONLY perform READ actions.
+
 ## FastAPI Conventions
 
 - Use `Annotated[..., Depends(...)]` for parameters and dependencies; create reusable type aliases for shared dependencies.

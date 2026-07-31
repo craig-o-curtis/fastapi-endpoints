@@ -8,7 +8,7 @@ include = ["books_api*"]
 [project]
 name = "books-api"
 version = "1.0.0"
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 
 dependencies = [
     "fastapi>=0.140.0",
@@ -38,7 +38,7 @@ dev = [
 filterwarnings = ["ignore::starlette.exceptions.StarletteDeprecationWarning"]
 
 [tool.ruff]
-target-version = "py312"
+target-version = "py314"
 include = ["books_api/**/*.py", "books_api/*.py"]
 exclude = ["fastapienv", "__pycache__", ".git"]
 line-length = 88
