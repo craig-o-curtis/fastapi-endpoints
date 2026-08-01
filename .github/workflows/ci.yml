@@ -17,9 +17,11 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.14"
-      - run: uv sync --extra dev
-      - run: uv run ruff format --check books_api/ tests/
-      - run: uv run ruff check books_api/ tests/
+      - run: uv sync
+      - name: Format check
+        run: uv run ruff format --check .
+      - name: Lint
+        run: uv run ruff check .
 
   type-check:
     runs-on: ubuntu-latest
@@ -31,8 +33,9 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.14"
-      - run: uv sync --extra dev
-      - run: uv run ty check books_api/ tests/
+      - run: uv sync
+      - name: Type check (all projects)
+        run: uv run ty check projects/ libs/
 
   test:
     runs-on: ubuntu-latest
@@ -44,5 +47,6 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.14"
-      - run: uv sync --extra dev
-      - run: uv run pytest -v tests/
+      - run: uv sync
+      - name: Test (all projects)
+        run: uv run pytest -v projects/*/tests/

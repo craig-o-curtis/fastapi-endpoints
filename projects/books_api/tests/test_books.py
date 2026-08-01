@@ -3,10 +3,9 @@ from __future__ import annotations
 import copy
 
 import pytest
-from fastapi.testclient import TestClient
-
 from books_api import books as books_module
 from books_api.books import BOOKS, app
+from fastapi.testclient import TestClient
 
 ORIGINAL_BOOKS = copy.deepcopy(BOOKS)
 

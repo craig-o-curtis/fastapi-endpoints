@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, status
 from fastapi.responses import Response
+from shared.api_utils import is_casefold_match, is_positive_integer
 
-from .api_utils import is_casefold_match, is_positive_integer
 from .body_aliases import BookCreateBody, BookUpdateBody
 from .mock_data import BOOKS
 from .models import Book
