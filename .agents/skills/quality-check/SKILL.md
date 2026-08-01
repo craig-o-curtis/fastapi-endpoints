@@ -14,30 +14,30 @@ Auto-activate on: "quality check", "run checks", "lint and test", "qcheck", "qua
 
 ## Gates
 
-Run these commands from project root. Use `uv run` for all.
+Run these commands from workspace root. Use `uv run` for all.
 
 ### 1. Lint (parallel)
 
 ```
-uv run ruff check books_api/ tests/
+uv run ruff check projects/ libs/
 ```
 
 ### 2. Format (parallel)
 
 ```
-uv run ruff format --check books_api/ tests/
+uv run ruff format --check projects/ libs/
 ```
 
 ### 3. Typecheck (sequential — after lint+format)
 
 ```
-uv run ty check
+uv run ty check projects/ libs/
 ```
 
 ### 4. Tests (sequential — last)
 
 ```
-uv run pytest tests/ -v
+uv run pytest -v projects/*/tests/ libs/*/tests/
 ```
 
 ## Execution
@@ -56,10 +56,10 @@ uv run pytest tests/ -v
 **FAIL case:** one line per failed gate, quote shortest decisive error only. No full stack traces unless asked.
 
 Examples:
-- `Lint: FAIL — books_api/books.py:42: E501 line too long (120 > 88)`
-- `Format: FAIL — books_api/models.py not formatted`
-- `Typecheck: FAIL — books_api/books.py:15: error: unused import "Response"`
-- `Tests: FAIL — test_books.py::TestReadBooks::test_filter_By_query_Params FAILED (assert 3 == 2)`
+- `Lint: FAIL — projects/books_api/books.py:42: E501 line too long (120 > 88)`
+- `Format: FAIL — projects/books_api/models.py not formatted`
+- `Typecheck: FAIL — projects/books_api/books.py:15: error: unused import "Response"`
+- `Tests: FAIL — projects/books_api/tests/test_books.py::TestReadBooks::test_filter_By_query_Params FAILED (assert 3 == 2)`
 
 ## Rules
 

@@ -92,8 +92,8 @@ Results from running `.agents/skills/quality-check/SKILL.md` before completing:
 
 If any gate fails, replace ✅ with ❌ and quote the shortest decisive error:
 
-- ❌ Lint — `books_api/books.py:42: E501 line too long (120 > 88)`
-- ❌ Formatting — `books_api/models.py not formatted`
-- ❌ Types — `books_api/books.py:15: error: unused import "Response"`
-- ❌ Tests — `test_books.py::TestReadBooks::test_filter_by_query_params FAILED (assert 3 == 2)`
+- ❌ Lint — `projects/books_api/books.py:42: E501 line too long (120 > 88)`
+- ❌ Formatting — `projects/books_api/models.py not formatted`
+- ❌ Types — `projects/books_api/books.py:15: error: unused import "Response"`
+- ❌ Tests — `projects/books_api/tests/test_books.py::TestReadBooks::test_filter_by_query_params FAILED (assert 3 == 2)`
 ```

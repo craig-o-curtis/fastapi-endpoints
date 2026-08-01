@@ -23,7 +23,7 @@ This project uses FastAPI. Follow these conventions when working with the codeba
 - Type checking: use `ty`.
 - Async utilities: use Asyncer when mixing async and blocking code.
 - Database: use SQLModel over SQLAlchemy.
-- HTTP client: use HTTPX over Requests.
+- HTTP client: use httpx2 over Requests.
 
 ## Streaming
 
@@ -33,6 +33,7 @@ This project uses FastAPI. Follow these conventions when working with the codeba
 ## References
 
 Detailed guidance is available in the skill files under `.agents/skills/fastapi/`:
+
 - `references/pydantic.md`
 - `references/responses.md`
 - `references/streaming.md`

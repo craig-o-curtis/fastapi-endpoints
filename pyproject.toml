@@ -1,56 +1,45 @@
-[build-system]
-requires = ["setuptools>=68.0"]
-build-backend = "setuptools.build_meta"
-
-[tool.setuptools.packages.find]
-include = ["books_api*"]
-
 [project]
-name = "books-api"
-version = "1.0.0"
+name = "fastapi-backend"
+version = "0.1.0"
 requires-python = ">=3.14"
-
 dependencies = [
-    "fastapi>=0.140.0",
-    "uvicorn>=0.30.0",
-    "bcrypt==4.0.1",
-    "cryptography",
-    "psycopg2-binary",
-    "PyMySQL",
-    "python-jose",
-    "python-multipart",
-    "SQLAlchemy",
-    "passlib",
-    "aiofiles",
-    "jinja2",
+    "books-api",
+    "tasks-api",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "ruff>=0.6.0",
     "ty>=0.0.63",
     "pytest>=8.0.0",
-    "httpx>=0.27.0",
     "pytest-asyncio>=1.4.0",
+    "httpx2>=2.9.1",
 ]
 
-[tool.pytest.ini_options]
-filterwarnings = ["ignore::starlette.exceptions.StarletteDeprecationWarning"]
+[tool.uv.workspace]
+members = ["projects/*", "libs/*"]
+
+[tool.uv.sources]
+shared = { workspace = true }
+books-api = { workspace = true }
+tasks-api = { workspace = true }
 
 [tool.ruff]
 target-version = "py314"
-include = ["books_api/**/*.py", "books_api/*.py"]
-exclude = ["fastapienv", "__pycache__", ".git"]
+include = ["**/*.py"]
+exclude = ["__pycache__", ".git"]
 line-length = 88
 
 [tool.ruff.lint]
 select = ["E", "W", "F", "I", "UP", "B", "SIM"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["books_api"]
 combine-as-imports = true
 
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
+
+[tool.pytest.ini_options]
+filterwarnings = ["ignore::starlette.exceptions.StarletteDeprecationWarning"]
