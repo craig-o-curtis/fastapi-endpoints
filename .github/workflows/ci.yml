@@ -7,7 +7,21 @@ on:
     branches: [main]
 
 jobs:
-  lint-and-format:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+      - run: uv sync
+      - name: Lint
+        run: uv run ruff check .
+
+  format:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,8 +34,6 @@ jobs:
       - run: uv sync
       - name: Format check
         run: uv run ruff format --check .
-      - name: Lint
-        run: uv run ruff check .
 
   type-check:
     runs-on: ubuntu-latest
