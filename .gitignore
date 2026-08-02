@@ -15,6 +15,10 @@ build/
 # OS
 .DS_Store
 
+# SQLite data
+*.db
+data/
+
 # Fallow
 .fallow/
 .pytest_cache/
