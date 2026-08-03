@@ -1,11 +1,10 @@
 """SQLAlchemy models for tasks API."""
 
-from sqlalchemy import Boolean, Column, Integer, String
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from tasks_api.database import Base
 
-from .database import Base
 
-
-class Tasks(Base):
+class Task(Base):
     """Task model representing the tasks table."""
 
     __tablename__ = "tasks"
@@ -15,3 +14,4 @@ class Tasks(Base):
     description = Column(String, index=True)
     priority = Column(Integer, index=True)
     completed = Column(Boolean, default=False)
+    owner_id = Column(Integer, ForeignKey("users.id"))

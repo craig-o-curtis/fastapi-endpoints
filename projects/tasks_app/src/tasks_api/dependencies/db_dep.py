@@ -5,8 +5,7 @@ from typing import Annotated
 
 from fastapi import Depends
 from sqlalchemy.orm import Session
-
-from .database import SessionLocal
+from tasks_api.database import SessionLocal
 
 
 # Using Generator to ensure the session is closed after use

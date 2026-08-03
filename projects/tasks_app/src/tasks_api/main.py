@@ -2,7 +2,7 @@
 
 import uvicorn
 
-from .database import init_db
+from tasks_api.database import init_db
 
 
 def main() -> None:
