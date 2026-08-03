@@ -11,7 +11,7 @@ Standard FastAPI project layout, split by responsibility so each file has one jo
 | `config.py`       | Environment-driven settings (currently just `DATABASE_URL`, defaulting to local SQLite)                       | Centralizes config reads so nothing else touches `os.getenv` directly                                                  |
 | `database.py`     | SQLAlchemy engine, session factory (`SessionLocal`), declarative `Base`, and `init_db()`                      | Table creation is explicit at startup, not an import-time side effect                                                  |
 | `models.py`       | SQLAlchemy ORM models — the DB table shape                                                                    | One class per table, isolated from the API contract                                                                    |
-| `schemas.py`      | Pydantic models — the API's request/response shape (`TaskRead`, `TaskPost`)                                   | Lets the DB schema and public API contract evolve independently                                                        |
+| `schemas.py`      | Pydantic models — the API's request/response shape (`ReadTaskRequest`, `CreateTaskRequest`)                   | Lets the DB schema and public API contract evolve independently                                                        |
 | `dependencies.py` | FastAPI `Depends` providers, e.g. `get_db` / `DbDep` for per-request DB sessions                              | Shared across routers via import instead of being redefined per file                                                   |
 | `routers.py`      | `APIRouter` with endpoint handlers, grouped by resource (`/tasks`)                                            | Keeps route logic out of `app.py`; new resources get their own router module as the app grows                          |
 
@@ -25,10 +25,18 @@ cd projects/tasks_app/data
 
 
 # Run
-sqlite3 tasks.db
+sqlite3 tasksapp.db
 
 # Stop
 .quit
+```
+
+## Tokens
+
+Create with script:
+
+```bash
+openssl rand -hex 32
 ```
 
 ## SQL basics
@@ -92,37 +100,26 @@ DROP TABLE tasks;
 
 ## Tips
 
-Column mode
+### Output modes
 
 ```sql
+-- Column
 .mode column
 select * from tasks;
-```
 
-Markdown mode
-
-```sql
+-- Markdown
 .mode markdown
 select * from tasks;
-```
 
-Box mode
-
-```sql
+-- Box
 .mode box
 select * from tasks;
-```
 
-Table mode
-
-```sql
+-- Table
 .mode table
 select * from tasks;
-```
 
-Headers on
-
-```sql
+-- Headers on
 .headers on
 select * from tasks;
 ```
