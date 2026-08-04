@@ -22,9 +22,11 @@ def authenticate_user(username: str, password: str, db: Session) -> User | None:
     return user
 
 
-def create_access_token(username: str, user_id: int, expires_delta: timedelta) -> str:
+def create_access_token(
+    username: str, user_id: int, role: str, expires_delta: timedelta
+) -> str:
     """Create a JWT access token."""
-    encode = {"sub": username, "id": user_id}
+    encode = {"sub": username, "id": user_id, "role": role}
     expires = datetime.now(UTC) + expires_delta
     encode.update({"exp": expires})
     return jwt.encode(

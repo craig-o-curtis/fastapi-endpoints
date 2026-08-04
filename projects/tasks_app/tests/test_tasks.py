@@ -119,7 +119,47 @@ class TestDeleteTask:
         response = api_client.delete("/tasks/999")
         assert response.status_code == 404
 
+
+class TestOwnerIsolation:
+    def test_user_cannot_see_other_tasks(self, isolation_client: TestClient) -> None:
+        """User 1 should not see tasks owned by user 2."""
+        response = isolation_client.get("/tasks")
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) == 0
+
+    def test_user_cannot_get_other_task(self, isolation_client: TestClient) -> None:
+        """User 1 should get 404 when trying to get user 2's task."""
+        response = isolation_client.get("/tasks/1")
+        assert response.status_code == 404
         assert response.json()["detail"] == "Task not found"
+
+    def test_user_cannot_update_other_task(self, isolation_client: TestClient) -> None:
+        """User 1 should get 404 when trying to update user 2's task."""
+        update_data = {"title": "Hacked"}
+        response = isolation_client.put("/tasks/1", json=update_data)
+        assert response.status_code == 404
+        assert response.json()["detail"] == "Task not found"
+
+    def test_user_cannot_delete_other_task(self, isolation_client: TestClient) -> None:
+        """User 1 should get 404 when trying to delete user 2's task."""
+        response = isolation_client.delete("/tasks/1")
+        assert response.status_code == 404
+        assert response.json()["detail"] == "Task not found"
+
+    def test_partial_update(self, api_client: TestClient) -> None:
+        """User can update only some fields of a task."""
+        update_data = {"title": "Updated Title Only"}
+        response = api_client.put("/tasks/1", json=update_data)
+        assert response.status_code == 204
+
+    def test_empty_task_list(self, api_client: TestClient) -> None:
+        """GET /tasks returns empty list when no tasks exist."""
+        # Delete the existing task
+        api_client.delete("/tasks/1")
+        response = api_client.get("/tasks")
+        assert response.status_code == 200
+        assert response.json() == []
 
     def test_delete_task_invalid_id(self, api_client: TestClient) -> None:
         """Verify that a task can be deleted."""
