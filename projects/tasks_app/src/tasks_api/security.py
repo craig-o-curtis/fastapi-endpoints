@@ -13,7 +13,7 @@ bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def authenticate_user(username: str, password: str, db: Session) -> User | None:
-    """Authenticate a user."""
+    """Authenticate a user. Returns the User object or None."""
     user = db.query(User).filter(User.username == username).first()
     if user is None:
         return None
@@ -22,9 +22,17 @@ def authenticate_user(username: str, password: str, db: Session) -> User | None:
     return user
 
 
-def create_access_token(username: str, user_id: int, expires_delta: timedelta) -> str:
+def verify_password(username: str, password: str, db: Session) -> bool:
+    """Verify a password against a user's stored hash. Returns True/False."""
+    user = authenticate_user(username, password, db)
+    return user is not None
+
+
+def create_access_token(
+    username: str, user_id: int, role: str, expires_delta: timedelta
+) -> str:
     """Create a JWT access token."""
-    encode = {"sub": username, "id": user_id}
+    encode = {"sub": username, "id": user_id, "role": role}
     expires = datetime.now(UTC) + expires_delta
     encode.update({"exp": expires})
     return jwt.encode(
