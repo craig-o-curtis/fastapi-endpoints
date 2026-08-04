@@ -12,7 +12,7 @@ from tasks_api.schemas.users import (
     UpdateUserPasswordRequest,
     UpdateUserRequest,
 )
-from tasks_api.security import authenticate_user, bcrypt_context
+from tasks_api.security import bcrypt_context, verify_password
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -91,8 +91,7 @@ def update_current_user_password(
 ) -> None:
     """Update current user's own password."""
     # Verify current password
-    authenticated = authenticate_user(user.username, updates.current_password, db)
-    if authenticated is None:
+    if not verify_password(str(user.username), updates.current_password, db):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Current password is incorrect",

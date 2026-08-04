@@ -1,5 +1,6 @@
 import tempfile
 from collections.abc import Generator
+from typing import Annotated
 
 import pytest
 from fastapi import Depends
@@ -9,7 +10,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from tasks_api.app import app
 from tasks_api.database import Base
-from tasks_api.dependencies.db_dep import get_db
+from tasks_api.dependencies.db_dep import DbDep, get_db
 from tasks_api.dependencies.user_dep import get_current_user
 from tasks_api.models.task import Task
 from tasks_api.models.user import User
@@ -102,7 +103,9 @@ def api_client(fake_user: User) -> Generator[TestClient]:
         finally:
             db.close()
 
-    def override_get_current_user(db=Depends(get_db)) -> User:
+    def override_get_current_user(
+        db: Annotated[DbDep, Depends(get_db)],
+    ) -> User | None:
         return db.query(User).filter(User.id == fake_user.id).first()
 
     app.dependency_overrides[get_db] = override_get_db
@@ -146,7 +149,9 @@ def admin_client(fake_admin_user: User) -> Generator[TestClient]:
         finally:
             db.close()
 
-    def override_get_current_user(db=Depends(get_db)) -> User:
+    def override_get_current_user(
+        db: Annotated[DbDep, Depends(get_db)],
+    ) -> User | None:
         return db.query(User).filter(User.id == fake_admin_user.id).first()
 
     app.dependency_overrides[get_db] = override_get_db

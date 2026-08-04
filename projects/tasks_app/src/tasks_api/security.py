@@ -13,13 +13,19 @@ bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def authenticate_user(username: str, password: str, db: Session) -> User | None:
-    """Authenticate a user."""
+    """Authenticate a user. Returns the User object or None."""
     user = db.query(User).filter(User.username == username).first()
     if user is None:
         return None
     if not bcrypt_context.verify(password, user.hashed_password):
         return None
     return user
+
+
+def verify_password(username: str, password: str, db: Session) -> bool:
+    """Verify a password against a user's stored hash. Returns True/False."""
+    user = authenticate_user(username, password, db)
+    return user is not None
 
 
 def create_access_token(
