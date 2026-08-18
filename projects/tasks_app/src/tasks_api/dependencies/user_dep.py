@@ -1,4 +1,3 @@
-import os
 from typing import Annotated
 
 from fastapi import Depends, HTTPException
@@ -7,6 +6,7 @@ from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from starlette import status
+from tasks_api.config import ALGORITHM, SECRET_KEY
 from tasks_api.dependencies.db_dep import DbDep
 from tasks_api.models.user import User
 
@@ -19,9 +19,7 @@ async def get_current_user(
 ) -> User:
     """Get the current user from the token."""
     try:
-        payload = jwt.decode(
-            token, os.environ["SECRET_KEY"], algorithms=[os.environ["ALGORITHM"]]
-        )
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         user_id: int = payload.get("id")
         if username is None or user_id is None:

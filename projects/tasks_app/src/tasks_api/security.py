@@ -1,12 +1,12 @@
 """Security utilities for tasks API."""
 
-import os
 from datetime import UTC, datetime, timedelta
 
 from jose import jwt
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
+from tasks_api.config import ALGORITHM, SECRET_KEY
 from tasks_api.models.user import User
 
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -35,6 +35,4 @@ def create_access_token(
     encode = {"sub": username, "id": user_id, "role": role}
     expires = datetime.now(UTC) + expires_delta
     encode.update({"exp": expires})
-    return jwt.encode(
-        encode, os.environ["SECRET_KEY"], algorithm=os.environ["ALGORITHM"]
-    )
+    return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
