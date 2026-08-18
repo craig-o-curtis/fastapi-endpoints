@@ -3,6 +3,8 @@
 from sqlalchemy import Boolean, Column, Integer, String
 from tasks_api.database import Base
 
+# This type/class is used to create the database tables.
+
 
 class User(Base):
     """User model representing the users table."""

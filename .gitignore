@@ -29,3 +29,5 @@ data/
 # Agents
 .claude/
 .kilo/
+
+.env

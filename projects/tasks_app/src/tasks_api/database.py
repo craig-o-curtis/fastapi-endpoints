@@ -1,24 +1,25 @@
-"""Database configuration for tasks API."""
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 from tasks_api.config import DATABASE_URL
 
-engine = create_engine(
-    DATABASE_URL,
-    connect_args={"check_same_thread": False},  # SQLite-specific
-)
+
+def _get_connect_args(database_url: str) -> dict[str, object]:
+    if database_url.startswith("sqlite"):
+        return {"check_same_thread": False}
+    return {}
+
+
+engine = create_engine(DATABASE_URL, connect_args=_get_connect_args(DATABASE_URL))
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
+# This is the base class for all models
 class Base(DeclarativeBase):
-    """Base class for SQLAlchemy models."""
-
     pass
 
 
+# This function
 def init_db() -> None:
-    """Create all tables. Call explicitly on startup."""
     Base.metadata.create_all(bind=engine)

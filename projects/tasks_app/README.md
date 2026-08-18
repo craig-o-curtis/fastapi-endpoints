@@ -17,6 +17,23 @@ Standard FastAPI project layout, split by responsibility so each file has one jo
 
 This mirrors the common "layered" FastAPI convention: **routing** (routers) → **contracts** (schemas) → **persistence** (models/database) → **wiring** (dependencies/config), with `app.py` tying it together and `main.py` as the runnable entry point. It intentionally stops there — no service layer, no repository pattern, no DI container — because the app is small enough that those would add indirection without paying for itself yet. Reach for that structure later only if routers start doing non-trivial business logic beyond basic CRUD.
 
+## Database
+
+This app supports **SQLite** (default) and **PostgreSQL**.
+
+- **SQLite**: no setup needed, uses `data/tasksapp.db`
+- **PostgreSQL**: see [POSTGRES_SETUP.md](POSTGRES_SETUP.md) for Docker Compose and local pgAdmin4 instructions
+
+To switch databases, set or unset `DATABASE_URL` in `.env`:
+
+```bash
+# PostgreSQL
+DATABASE_URL=postgresql+psycopg://postgres:12345678@localhost:5432/TasksApplicationDatabase
+
+# SQLite (default)
+# DATABASE_URL=
+```
+
 ## Run db
 
 ```bash

@@ -3,6 +3,8 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from tasks_api.database import Base
 
+# This type/class is used to create the database tables.
+
 
 class Task(Base):
     """Task model representing the tasks table."""

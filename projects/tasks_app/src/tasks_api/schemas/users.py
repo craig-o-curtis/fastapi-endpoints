@@ -1,6 +1,7 @@
 from pydantic import BaseModel, ConfigDict, Field
 
-# File for pydantic models
+# File for pydantic models, which are used to validate data
+# incoming data is validated against these models
 
 
 class ReadUserRequest(BaseModel):

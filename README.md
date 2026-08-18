@@ -37,7 +37,8 @@ Each project defines a console-script entry point ([project.scripts]), so `uv ru
 Dev tools (ruff, ty, pytest) are shared across the workspace, so most commands can run at the root without `--package`:
 
 ```bash
-uv run pytest -v                       # test everything
+uv run pytest -v                       # test everything, verbose
+uv run pytest                          # condensed version
 uv run ruff check .                    # lint everything
 uv run ruff format --check .           # format-check everything
 uv run ty check projects/ libs/        # type-check everything
