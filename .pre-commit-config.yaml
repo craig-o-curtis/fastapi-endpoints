@@ -1,0 +1,36 @@
+minimum_pre_commit_version: "3.5.0"
+
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: Ruff lint
+        entry: uv run ruff check .
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true
+
+      - id: ruff-format
+        name: Ruff format check
+        entry: uv run ruff format --check .
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true
+
+      - id: ty-check
+        name: Type check (ty)
+        entry: uv run ty check projects/ libs/
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true
+
+      - id: pytest
+        name: Tests (pytest)
+        entry: uv run pytest -v
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true

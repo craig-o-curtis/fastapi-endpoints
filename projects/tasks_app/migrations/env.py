@@ -43,8 +43,11 @@ def run_migrations_offline() -> None:
 def run_migrations_online() -> None:
     connect_args = get_connect_args()
     config.set_main_option("sqlalchemy.url", DATABASE_URL)
+    section = config.get_section(config.config_ini_section)
+    if section is None:
+        section = {}
     engine = engine_from_config(
-        config.get_section(config.config_ini_section),
+        section,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
         connect_args=connect_args,
