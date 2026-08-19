@@ -7,9 +7,9 @@ Standard FastAPI project layout, split by responsibility so each file has one jo
 | File              | Responsibility                                                                                                | Why it's separate                                                                                                      |
 | ----------------- | ------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `app.py`          | App factory — creates the `FastAPI()` instance, sets metadata, wires up routers                               | Single source of truth for the `app` object; both `main.py` and any ASGI server (uvicorn/gunicorn) import it from here |
-| `main.py`         | CLI entry point (`tasks-api` script, see `pyproject.toml`); calls `init_db()` then starts uvicorn with reload | Keeps `app.py` importable (e.g. in tests) without triggering DB init or starting a server                              |
+| `main.py`         | CLI entry point (`tasks-api` script, see `pyproject.toml`); starts uvicorn with reload                          | Keeps `app.py` importable (e.g. in tests) without triggering DB init or starting a server                              |
 | `config.py`       | Environment-driven settings (currently just `DATABASE_URL`, defaulting to local SQLite)                       | Centralizes config reads so nothing else touches `os.getenv` directly                                                  |
-| `database.py`     | SQLAlchemy engine, session factory (`SessionLocal`), declarative `Base`, and `init_db()`                      | Table creation is explicit at startup, not an import-time side effect                                                  |
+| `database.py`     | SQLAlchemy engine, session factory (`SessionLocal`), declarative `Base`, and `init_db()` (legacy, unused)      | Table creation is now handled by Alembic migrations; `init_db()` kept for tests only                                    |
 | `models.py`       | SQLAlchemy ORM models — the DB table shape                                                                    | One class per table, isolated from the API contract                                                                    |
 | `schemas.py`      | Pydantic models — the API's request/response shape (`ReadTaskRequest`, `CreateTaskRequest`)                   | Lets the DB schema and public API contract evolve independently                                                        |
 | `dependencies.py` | FastAPI `Depends` providers, e.g. `get_db` / `DbDep` for per-request DB sessions                              | Shared across routers via import instead of being redefined per file                                                   |
@@ -19,18 +19,32 @@ This mirrors the common "layered" FastAPI convention: **routing** (routers) → 
 
 ## Database
 
-This app supports **SQLite** (default) and **PostgreSQL**.
+This app supports three backends, toggled entirely through `.env`:
 
-- **SQLite**: no setup needed, uses `data/tasksapp.db`
-- **PostgreSQL**: see [POSTGRES_SETUP.md](POSTGRES_SETUP.md) for Docker Compose and local pgAdmin4 instructions
+| Backend | Format | Storage | GUI | Best for |
+|---------|--------|---------|-----|----------|
+| **SQLite** | File (`data/tasksapp.db`) | Local file | None built-in | Quick local development, zero setup |
+| **PostgreSQL** | Server (`localhost:5432`) | Docker volume `pgdata` | pgAdmin4 (port `5050`) | Production-like features, JSON, complex queries |
+| **MySQL** | Server (`localhost:3306`) | Docker volume `mysqldata` | Adminer (port `8080`) | Widely deployed, alternative to Postgres |
+
+Table creation is handled by Alembic migrations. After setting your `DATABASE_URL` in `.env`, run:
+
+```bash
+uv run alembic upgrade head
+```
+
+See [ALEMBIC.md](ALEMBIC.md) for all migration commands.
 
 To switch databases, set or unset `DATABASE_URL` in `.env`:
 
 ```bash
+# MySQL (requires running DB)
+DATABASE_URL=mysql+pymysql://root:12345678@localhost:3306/tasks_application_database
+
 # PostgreSQL
 DATABASE_URL=postgresql+psycopg://postgres:12345678@localhost:5432/TasksApplicationDatabase
 
-# SQLite (default)
+# SQLite (default local file)
 # DATABASE_URL=
 ```
 

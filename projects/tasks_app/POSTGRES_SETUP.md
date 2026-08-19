@@ -82,9 +82,19 @@ Two ways to run PostgreSQL for the Tasks API: **Docker Compose** (isolated, disp
 
 ## Seeding the Database
 
-Regardless of which option you used, run the SQL below in pgAdmin4's Query Tool to create tables and the admin user.
+**Tables are created by Alembic migrations.** After starting Postgres, run:
 
-### 1. Create tables
+```bash
+uv run alembic upgrade head
+```
+
+This applies the initial migration and creates `users` and `tasks` tables.
+
+The steps below are for **local Postgres clients** or if you want to reset the schema manually. Only Step 2 (admin user) is truly required to get a working login.
+
+### 1. Run migrations (or create tables manually)
+
+If you're using pgAdmin4 or a local Postgres client and want to create/reset the schema manually:
 
 ```sql
 DROP TABLE IF EXISTS users;
@@ -109,6 +119,12 @@ CREATE TABLE tasks(
     completed BOOLEAN DEFAULT FALSE,
     owner_id INTEGER REFERENCES users(id)
 );
+```
+
+Alternatively, use Alembic (recommended for ongoing development):
+
+```bash
+uv run alembic upgrade head
 ```
 
 ### 2. Create admin user
@@ -196,5 +212,5 @@ docker compose ps         # check containers are running
 ```bash
 dropdb TasksApplicationDatabase
 createdb TasksApplicationDatabase
-# Then re-run the seed SQL above
+uv run alembic upgrade head
 ```
