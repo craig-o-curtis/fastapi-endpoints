@@ -10,6 +10,7 @@ class ReadUserRequest(BaseModel):
     email: str
     first_name: str | None
     last_name: str | None
+    phone_number: str | None
     is_active: bool
     hashed_password: str
     role: str
@@ -23,6 +24,7 @@ class ReadUserPublic(BaseModel):
     email: str
     first_name: str | None
     last_name: str | None
+    phone_number: str | None
     is_active: bool
     role: str
 
@@ -34,6 +36,7 @@ class CreateUserRequest(BaseModel):
     email: str = Field(min_length=5, max_length=100)
     first_name: str | None = Field(default=None, min_length=1, max_length=50)
     last_name: str | None = Field(default=None, min_length=1, max_length=50)
+    phone_number: str | None = Field(default=None, max_length=20)
     password: str = Field(min_length=8, max_length=100)
     role: str | None = Field(default="user", min_length=3, max_length=20)
 
@@ -43,6 +46,7 @@ class UpdateUserRequest(BaseModel):
     email: str | None = Field(default=None, min_length=5, max_length=100)
     first_name: str | None = Field(default=None, min_length=1, max_length=50)
     last_name: str | None = Field(default=None, min_length=1, max_length=50)
+    phone_number: str | None = Field(default=None, max_length=20)
     password: str | None = Field(default=None, min_length=8, max_length=100)
     role: str | None = Field(default=None, min_length=3, max_length=20)
 

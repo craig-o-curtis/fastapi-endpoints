@@ -48,6 +48,14 @@ class TestUpdateCurrentUser:
         response = api_client.put("/users/me", json=update_data)
         assert response.status_code == 403
 
+    def test_user_can_update_own_phone_number(self, api_client: TestClient) -> None:
+        """Authenticated user can update own phone_number."""
+        update_data = {"phone_number": "555-1234"}
+        response = api_client.put("/users/me", json=update_data)
+        assert response.status_code == 200
+        data = response.json()
+        assert data["phone_number"] == "555-1234"
+
 
 class TestDeleteCurrentUser:
     def test_user_deletes_own_account(self, api_client: TestClient) -> None:
@@ -82,6 +90,29 @@ class TestAdminSelfService:
         response = admin_client.delete("/users/me")
         assert response.status_code == 204
         assert response.content == b""
+
+
+class TestAdminUserUpdate:
+    def test_admin_can_update_user_phone_number(self, admin_client: TestClient) -> None:
+        """Admin can update another user's phone_number."""
+        # Create a user first
+        new_user = {
+            "username": "phonetest",
+            "email": "phonetest@example.com",
+            "first_name": "Phone",
+            "last_name": "Test",
+            "password": "password123",
+        }
+        create_resp = admin_client.post("/users", json=new_user)
+        assert create_resp.status_code == 201
+        user_id = create_resp.json()["id"]
+
+        # Update phone_number
+        update_data = {"phone_number": "555-9999"}
+        response = admin_client.put(f"/users/{user_id}", json=update_data)
+        assert response.status_code == 200
+        data = response.json()
+        assert data["phone_number"] == "555-9999"
 
 
 class TestPasswordHashing:

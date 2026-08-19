@@ -21,7 +21,7 @@ uv run alembic upgrade head
 | `uv run alembic current`                          | Shows the current revision the database is on                 | Check if a DB is migrated                                                                                    |
 | `uv run alembic heads`                            | Shows the latest available revision in `migrations/versions/` | See what `upgrade head` would apply                                                                          |
 | `uv run alembic history`                          | Lists all migrations in order                                 | Review the changelog                                                                                         |
-| `uv run alembic revision --autogenerate -m "msg"` | Creates a new migration by diffing models against the DB      | **After changing a model** — always review the generated file before committing                              |
+| `uv run alembic revision --autogenerate -m "msg"` | Creates a new migration by comparing models against the live DB      | **After changing a model** — always review the generated file before committing                              |
 | `uv run alembic check`                            | Detects if models and DB schema have drifted                  | Run in CI to catch unapplied changes                                                                         |
 | `uv run alembic init <dir>`                       | Initializes a new migrations environment                      | Not needed here — already set up                                                                             |
 
@@ -36,6 +36,14 @@ Edit a file in `src/tasks_api/models/` (e.g. add a column to `Task`).
 ```bash
 uv run alembic revision --autogenerate -m "add priority to tasks"
 ```
+
+The `--autogenerate` flag tells Alembic to compare your models (`Base.metadata`) against the live database and automatically generate the `op.*` calls (`op.add_column()`, `op.create_table()`, etc.). Without it, you'd get an empty migration with blank `upgrade()`/`downgrade()` functions and have to write every `op.*` call by hand.
+
+**When to use `--autogenerate`:** almost always. It handles the boilerplate for simple schema changes (add/drop columns, tables, indexes).
+
+**When to omit `--autogenerate`:** when the change can't be expressed as a simple diff — e.g. data migrations, renaming columns, or complex constraint changes. In those cases, use `uv run alembic revision -m "msg"` and write the `op.*` calls manually.
+
+**Always review the generated file.** Autogenerate is good but not perfect — it may miss `server_default` values, `nullable` changes, or index names. Check the `upgrade()` and `downgrade()` functions before committing.
 
 ### 3. Review the generated file
 

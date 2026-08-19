@@ -65,6 +65,7 @@ def admin_create_user(
         username=new_user.username,
         first_name=new_user.first_name,
         last_name=new_user.last_name,
+        phone_number=new_user.phone_number,
         role=new_user.role or "user",
         hashed_password=bcrypt_context.hash(new_user.password),
         is_active=True,

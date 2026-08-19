@@ -8,7 +8,11 @@ sys.path.insert(0, "src")
 
 from tasks_api.config import DATABASE_URL
 from tasks_api.database import Base
-from tasks_api.models import task, user
+
+# When task.py and user.py are imported, their Table objects register
+# themselves with Base.metadata via the declarative side effect.
+# These imports are required for autogenerate to see the tables.
+from tasks_api.models import task, user  # noqa: F401
 
 config = context.config
 
