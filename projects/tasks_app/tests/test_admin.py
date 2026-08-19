@@ -160,12 +160,14 @@ class TestAdminCreateUser:
             "email": "new@example.com",
             "first_name": "New",
             "last_name": "User",
+            "phone_number": "555-0001",
             "password": "password123",
         }
         response = admin_client.post("/users", json=new_user)
         assert response.status_code == 201
         data = response.json()
         assert data["username"] == new_user["username"]
+        assert data["phone_number"] == new_user["phone_number"]
         assert data["role"] == "user"
         assert "hashed_password" not in data
 
@@ -176,6 +178,7 @@ class TestAdminCreateUser:
             "email": "super@example.com",
             "first_name": "Super",
             "last_name": "Admin",
+            "phone_number": "555-0002",
             "password": "password123",
             "role": "admin",
         }
@@ -193,6 +196,7 @@ class TestAdminCreateUser:
             "email": "other@example.com",
             "first_name": "Dup",
             "last_name": "User",
+            "phone_number": "555-0003",
             "password": "password123",
         }
         response = admin_client.post("/users", json=new_user)
@@ -206,11 +210,26 @@ class TestAdminCreateUser:
             "email": "admin@example.com",
             "first_name": "Dup",
             "last_name": "User",
+            "phone_number": "555-0004",
             "password": "password123",
         }
         response = admin_client.post("/users", json=new_user)
         assert response.status_code == 400
         assert response.json()["detail"] == "Email already registered"
+
+    def test_admin_create_user_missing_phone_number(
+        self, admin_client: TestClient
+    ) -> None:
+        """Admin gets 422 when creating a user without phone_number."""
+        new_user = {
+            "username": "nophone",
+            "email": "nophone@example.com",
+            "first_name": "No",
+            "last_name": "Phone",
+            "password": "password123",
+        }
+        response = admin_client.post("/users", json=new_user)
+        assert response.status_code == 422
 
     def test_non_admin_cannot_create_user(self, api_client: TestClient) -> None:
         """Non-admin user gets 403 on admin create user."""
@@ -219,6 +238,7 @@ class TestAdminCreateUser:
             "email": "hacker@example.com",
             "first_name": "Hack",
             "last_name": "Me",
+            "phone_number": "555-0005",
             "password": "password123",
         }
         response = api_client.post("/users", json=new_user)
@@ -257,6 +277,7 @@ class TestAdminDeleteUser:
             "email": "delete@example.com",
             "first_name": "Delete",
             "last_name": "Me",
+            "phone_number": "555-0006",
             "password": "password123",
         }
         create_resp = admin_client.post("/users", json=new_user)

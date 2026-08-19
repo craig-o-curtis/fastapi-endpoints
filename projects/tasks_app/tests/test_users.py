@@ -101,6 +101,7 @@ class TestAdminUserUpdate:
             "email": "phonetest@example.com",
             "first_name": "Phone",
             "last_name": "Test",
+            "phone_number": "555-0007",
             "password": "password123",
         }
         create_resp = admin_client.post("/users", json=new_user)
@@ -130,6 +131,7 @@ class TestPasswordHashing:
             "email": "pwtest@example.com",
             "first_name": "PW",
             "last_name": "Test",
+            "phone_number": "555-0008",
             "password": "password123",
         }
         create_resp = admin_client.post("/users", json=new_user)
