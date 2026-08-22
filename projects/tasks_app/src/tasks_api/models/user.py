@@ -1,6 +1,7 @@
 """SQLAlchemy models for tasks API."""
 
-from sqlalchemy import Boolean, Column, Integer, String
+from sqlalchemy import Boolean, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
 from tasks_api.database import Base
 
 # This type/class is used to create the database tables.
@@ -11,12 +12,14 @@ class User(Base):
 
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, index=True)
-    username = Column(String(255), unique=True, index=True)
-    email = Column(String(255), unique=True, index=True)
-    first_name = Column(String(255))
-    last_name = Column(String(255))
-    phone_number = Column(String(255))
-    hashed_password = Column(String(255))
-    is_active = Column(Boolean, default=True)
-    role = Column(String(255), default="user")  # Default role is 'user'
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    username: Mapped[str] = mapped_column(String(255), unique=True, index=True)
+    email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
+    first_name: Mapped[str | None] = mapped_column(String(255))
+    last_name: Mapped[str | None] = mapped_column(String(255))
+    phone_number: Mapped[str | None] = mapped_column(String(255))
+    hashed_password: Mapped[str] = mapped_column(String(255))
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    role: Mapped[str] = mapped_column(
+        String(255), default="user"
+    )  # Default role is 'user'

@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import Annotated, cast
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
@@ -23,13 +23,8 @@ def login_for_access_token(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate user.",
         )
-    # Here the cast fn is used to tell mypy (static type checker) that user.id is an int
-    # and user.role is a str, even though they are Optional[int]
-    # and Optional[str] respectively.
-    # This is safe because we know that if user is not None,
-    # then user.id and user.role will not be None.
-    user_id = cast(int, user.id)
-    user_role = cast(str, user.role)
+    user_id = user.id
+    user_role = user.role
     token = create_access_token(
         form_data.username, user_id, user_role, timedelta(minutes=20)
     )

@@ -57,6 +57,37 @@ class TestUpdateCurrentUser:
         assert data["phone_number"] == "555-1234"
 
 
+class TestUpdateCurrentUserPhone:
+    def test_user_updates_own_phone_number(self, api_client: TestClient) -> None:
+        """PATCH /users/me/phone-number updates the user's phone number."""
+        response = api_client.patch(
+            "/users/me/phone-number", json={"phone_number": "555-4321"}
+        )
+        assert response.status_code == 204
+        assert response.content == b""
+
+        profile = api_client.get("/users/me")
+        assert profile.status_code == 200
+        assert profile.json()["phone_number"] == "555-4321"
+
+    def test_user_update_phone_number_missing(self, api_client: TestClient) -> None:
+        """PATCH /users/me/phone-number without phone_number returns 422."""
+        response = api_client.patch("/users/me/phone-number", json={})
+        assert response.status_code == 422
+
+    def test_user_update_phone_number_too_short(self, api_client: TestClient) -> None:
+        """PATCH /users/me/phone-number with empty phone_number returns 422."""
+        response = api_client.patch("/users/me/phone-number", json={"phone_number": ""})
+        assert response.status_code == 422
+
+    def test_user_update_phone_number_too_long(self, api_client: TestClient) -> None:
+        """PATCH /users/me/phone-number exceeding max_length returns 422."""
+        response = api_client.patch(
+            "/users/me/phone-number", json={"phone_number": "1" * 21}
+        )
+        assert response.status_code == 422
+
+
 class TestDeleteCurrentUser:
     def test_user_deletes_own_account(self, api_client: TestClient) -> None:
         """Authenticated user can delete own account."""

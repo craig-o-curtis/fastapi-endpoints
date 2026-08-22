@@ -10,6 +10,7 @@ from tasks_api.schemas.users import (
     CreateUserRequest,
     ReadUserPublic,
     UpdateUserPasswordRequest,
+    UpdateUserPhoneRequest,
     UpdateUserRequest,
 )
 from tasks_api.security import bcrypt_context, verify_password
@@ -106,6 +107,17 @@ def update_current_user_password(
         )
 
     user.hashed_password = bcrypt_context.hash(updates.new_password)
+    db.commit()
+
+
+@router.patch("/me/phone-number", status_code=status.HTTP_204_NO_CONTENT)
+def update_current_user_phone(
+    user: UserDep,
+    db: DbDep,
+    updates: UpdateUserPhoneRequest,
+) -> None:
+    """Update current user's own phone number."""
+    user.phone_number = updates.phone_number
     db.commit()
 
 
